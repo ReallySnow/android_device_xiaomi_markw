@@ -1,0 +1,254 @@
+From 2a2926575f88440e0dab0266b3a91396f9da3262 Mon Sep 17 00:00:00 2001
+From: ReallySnow <reallysnow233@gmail.com>
+Date: Wed, 19 Dec 2018 21:57:45 +0800
+Subject: [PATCH] SystemUI: allow devices override audio panel location
+
+Some devices have volume buttons on left side and it not fancy if volume panel will be at right side.
+You can override panel location using overlay for SystemUI:
+
+    <!-- Allow devices override audio panel location to the left side -->
+    <bool name="config_audioPanelOnLeftSide">true</bool>
+
+    Change-Id: I273061a84847d2ad9dcda028d6c407c98841647b
+
+Also includes:
+
+commit f25ce242d9d0ca29d663d79ccb74ebbed02144c3 (HEAD -> pie)
+Author: Alex Cruz <alex@dirtyunicorns.com>
+Date:   Fri Dec 21 22:08:52 2018 -0600
+
+    Volume panel: Do the same with less
+
+    Change-Id: If41456f71ffd18466166e7b4120ff34d9e6f5a46
+
+commit 80fd436c97cb0eda45bd488cdd3ce23b2d1ba141
+Author: Kshitij Gupta <kshitijgm@gmail.com>
+Date:   Wed Dec 26 15:46:18 2018 +0000
+
+    VolumeDialogImpl: Fix animation direction logic
+
+    - This behaviour was changed in https://github.com/PotatoProject/frameworks_base/commit/f6f78266d42188b2808a735d12b4bca0aa3fafd9
+    - Correct animation direction for better UX
+
+    Change-Id: Ie036be0d3ac895d5de76040ecc8027036fb0ad3b
+    Signed-off-by: Jagrav Naik <jagravnaik0@gmail.com>
+    Signed-off-by: Kshitij Gupta <kshitijgm@gmail.com>
+
+Signed-off-by: itsjoeoui <maximeyxw@gmail.com>
+Change-Id: Ibb19575d9e63aa62a9bfd18380d75f57076841c4
+---
+ .../layout/quick_status_bar_expanded_header.xml    |  4 +++
+ packages/SystemUI/res/layout/volume_dialog.xml     |  8 +----
+ packages/SystemUI/res/values/custom_config.xml     |  3 ++
+ packages/SystemUI/res/values/dimens.xml            |  4 +++
+ .../android/systemui/volume/VolumeDialogImpl.java  | 41 +++++++++++++++++++---
+ 5 files changed, 48 insertions(+), 12 deletions(-)
+
+diff --git a/packages/SystemUI/res/layout/quick_status_bar_expanded_header.xml b/packages/SystemUI/res/layout/quick_status_bar_expanded_header.xml
+index ed18dc72840..50e71c097ef 100644
+--- a/packages/SystemUI/res/layout/quick_status_bar_expanded_header.xml
++++ b/packages/SystemUI/res/layout/quick_status_bar_expanded_header.xml
+@@ -22,6 +22,8 @@
+     android:layout_width="match_parent"
+     android:layout_height="@*android:dimen/quick_qs_total_height"
+     android:layout_gravity="@integer/notification_panel_layout_gravity"
++    android:layout_marginStart="@dimen/qs_items_padding"
++    android:layout_marginEnd="@dimen/qs_items_padding"
+     android:background="@android:color/transparent"
+     android:baselineAligned="false"
+     android:clickable="false"
+@@ -47,6 +49,8 @@
+         android:layout_below="@id/quick_qs_status_icons"
+         android:layout_marginStart="@dimen/qs_header_tile_margin_horizontal"
+         android:layout_marginEnd="@dimen/qs_header_tile_margin_horizontal"
++        android:paddingLeft="@dimen/qs_items_padding"
++        android:paddingRight="@dimen/qs_items_padding"
+         android:accessibilityTraversalAfter="@+id/date_time_group"
+         android:accessibilityTraversalBefore="@id/expand_indicator"
+         android:clipChildren="false"
+diff --git a/packages/SystemUI/res/layout/volume_dialog.xml b/packages/SystemUI/res/layout/volume_dialog.xml
+index 7d6547b9cd4..d009e27dc50 100644
+--- a/packages/SystemUI/res/layout/volume_dialog.xml
++++ b/packages/SystemUI/res/layout/volume_dialog.xml
+@@ -30,8 +30,6 @@
+         android:minWidth="@dimen/volume_dialog_panel_width"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:gravity="right"
+-        android:layout_gravity="right"
+         android:background="@android:color/transparent"
+         android:paddingRight="@dimen/volume_dialog_panel_transparent_padding_right"
+         android:paddingTop="@dimen/volume_dialog_panel_transparent_padding"
+@@ -45,8 +43,6 @@
+             android:layout_width="@dimen/volume_dialog_ringer_size"
+             android:layout_height="@dimen/volume_dialog_ringer_size"
+             android:layout_marginBottom="@dimen/volume_dialog_spacer"
+-            android:gravity="right"
+-            android:layout_gravity="right"
+             android:translationZ="@dimen/volume_dialog_elevation"
+             android:clipToPadding="false"
+             android:background="@drawable/rounded_bg_full">
+@@ -65,7 +61,6 @@
+             <include layout="@layout/volume_dnd_icon"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+-                     android:layout_marginRight="@dimen/volume_dialog_stream_padding"
+                      android:layout_marginTop="6dp"/>
+         </FrameLayout>
+ 
+@@ -141,8 +136,7 @@
+         android:layout="@layout/volume_tool_tip_view"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:layout_gravity="bottom | right"
+         android:layout_marginRight="@dimen/volume_tool_tip_right_margin"
+         android:layout_marginBottom="@dimen/volume_tool_tip_bottom_margin"/>
+ 
+-</FrameLayout>
+\ No newline at end of file
++</FrameLayout>
+diff --git a/packages/SystemUI/res/values/custom_config.xml b/packages/SystemUI/res/values/custom_config.xml
+index a43b1a04a38..4bbfa81c842 100644
+--- a/packages/SystemUI/res/values/custom_config.xml
++++ b/packages/SystemUI/res/values/custom_config.xml
+@@ -16,4 +16,7 @@
+          near events -->
+     <bool name="doze_brightness_sensor_reports_proximity" translatable="false">true</bool>
+ 
++    <!-- Allow devices override audio panel location to the left side -->
++    <bool name="config_audioPanelOnLeftSide">false</bool>
++
+ </resources>
+diff --git a/packages/SystemUI/res/values/dimens.xml b/packages/SystemUI/res/values/dimens.xml
+index 2e1799168b5..b94895daacb 100644
+--- a/packages/SystemUI/res/values/dimens.xml
++++ b/packages/SystemUI/res/values/dimens.xml
+@@ -972,6 +972,10 @@
+     <dimen name="edge_margin">8dp</dimen>
+ 
+     <dimen name="rounded_corner_content_padding">0dp</dimen>
++
++    <!-- Sets a custom extra padding for the QS icons and statusbar date -->
++    <dimen name="qs_items_padding">8dp</dimen>
++
+     <dimen name="nav_content_padding">0dp</dimen>
+     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
+     <dimen name="nav_quick_scrub_track_thickness">10dp</dimen>
+diff --git a/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogImpl.java b/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogImpl.java
+index 7b133f267d4..2274600c3ac 100644
+--- a/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogImpl.java
++++ b/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogImpl.java
+@@ -164,6 +164,8 @@ public class VolumeDialogImpl implements VolumeDialog,
+     private ViewStub mODICaptionsTooltipViewStub;
+     private View mODICaptionsTooltipView = null;
+ 
++    private boolean mLeftVolumeRocker;
++
+     public VolumeDialogImpl(Context context) {
+         mContext =
+                 new ContextThemeWrapper(context, R.style.qs_theme);
+@@ -175,6 +177,7 @@ public class VolumeDialogImpl implements VolumeDialog,
+         mShowActiveStreamOnly = showActiveStreamOnly();
+         mHasSeenODICaptionsTooltip =
+                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
++        mLeftVolumeRocker = mContext.getResources().getBoolean(R.bool.config_audioPanelOnLeftSide);
+     }
+ 
+     @Override
+@@ -223,7 +226,11 @@ public class VolumeDialogImpl implements VolumeDialog,
+         lp.format = PixelFormat.TRANSLUCENT;
+         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
+         lp.windowAnimations = -1;
+-        lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
++        if(!isAudioPanelOnLeftSide()){
++            lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
++        } else {
++            lp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
++        }
+         mWindow.setAttributes(lp);
+         mWindow.setLayout(WRAP_CONTENT, WRAP_CONTENT);
+ 
+@@ -232,7 +239,7 @@ public class VolumeDialogImpl implements VolumeDialog,
+         mDialogView.setAlpha(0);
+         mDialog.setCanceledOnTouchOutside(true);
+         mDialog.setOnShowListener(dialog -> {
+-            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
++            if (!isLandscape()) mDialogView.setTranslationX((mDialogView.getWidth() / 2.0f)*(isAudioPanelOnLeftSide() ? -1 : 1));
+             mDialogView.setAlpha(0);
+             mDialogView.animate()
+                     .alpha(1)
+@@ -263,6 +270,11 @@ public class VolumeDialogImpl implements VolumeDialog,
+         if (mRinger != null) {
+             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
+             mZenIcon = mRinger.findViewById(R.id.dnd_icon);
++            if(!isAudioPanelOnLeftSide()) {
++                mRinger.setForegroundGravity(Gravity.RIGHT);
++            } else {
++                mRinger.setForegroundGravity(Gravity.LEFT);
++            }
+         }
+ 
+         mODICaptionsView = mDialog.findViewById(R.id.odi_captions);
+@@ -273,6 +285,13 @@ public class VolumeDialogImpl implements VolumeDialog,
+         if (mHasSeenODICaptionsTooltip && mODICaptionsTooltipViewStub != null) {
+             mDialogView.removeView(mODICaptionsTooltipViewStub);
+             mODICaptionsTooltipViewStub = null;
++        }else if (mODICaptionsTooltipViewStub != null){
++            if(!isAudioPanelOnLeftSide()) {
++                mRinger.setForegroundGravity(Gravity.BOTTOM | Gravity.RIGHT);
++            } else {
++                mRinger.setForegroundGravity(Gravity.BOTTOM | Gravity.LEFT);
++            }
++
+         }
+ 
+         mSettingsView = mDialog.findViewById(R.id.settings_container);
+@@ -350,7 +369,11 @@ public class VolumeDialogImpl implements VolumeDialog,
+         if (D.BUG) Slog.d(TAG, "Adding row for stream " + stream);
+         VolumeRow row = new VolumeRow();
+         initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
+-        mDialogRowsView.addView(row.view);
++        if(!isAudioPanelOnLeftSide()){
++            mDialogRowsView.addView(row.view, 0);
++        } else {
++            mDialogRowsView.addView(row.view);
++        }
+         mRows.add(row);
+     }
+ 
+@@ -360,7 +383,11 @@ public class VolumeDialogImpl implements VolumeDialog,
+             final VolumeRow row = mRows.get(i);
+             initRow(row, row.stream, row.iconRes, row.iconMuteRes, row.important,
+                     row.defaultStream);
+-            mDialogRowsView.addView(row.view);
++            if(!isAudioPanelOnLeftSide()){
++                mDialogRowsView.addView(row.view, 0);
++            } else {
++                mDialogRowsView.addView(row.view);
++            }
+             updateVolumeRowH(row);
+         }
+     }
+@@ -753,7 +780,7 @@ public class VolumeDialogImpl implements VolumeDialog,
+                     mDialog.dismiss();
+                     tryToRemoveCaptionsTooltip();
+                 }, 50));
+-        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2.0f);
++        if (!isLandscape()) animator.translationX((mDialogView.getWidth() / 2.0f)*(isAudioPanelOnLeftSide() ? -1 : 1));
+         animator.start();
+         checkODICaptionsTooltip(true);
+         mController.notifyVisible(false);
+@@ -1444,6 +1471,10 @@ public class VolumeDialogImpl implements VolumeDialog,
+         }
+     }
+ 
++    private boolean isAudioPanelOnLeftSide() {
++        return mLeftVolumeRocker;
++    }
++
+     private static class VolumeRow {
+         private View view;
+         private TextView header;
+-- 
+2.11.0
+
